@@ -108,5 +108,16 @@ public final class TillProcess extends BaritoneProcessHelper implements ITillPro
 
 		return null;
 	}
+	@Override
+	public String displayName0()
+	{
+		return "Tilling the fucking dirt.";
+	}
+
+	@Override
+	public void onLostControl()
+	{
+		active = false;
+	}
 }
 
