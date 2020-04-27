@@ -96,6 +96,7 @@ public final class TillProcess extends BaritoneProcessHelper implements ITillPro
 			if(rot.isPresent() && isSafeToCancel)
 			{
 				baritone.getLookBehavior().updateTarget(rot.get(), true);
+
 				int hoeSlot = 0;
 				for (int i = 0; i < 9; ++i)
 				{
@@ -109,6 +110,10 @@ public final class TillProcess extends BaritoneProcessHelper implements ITillPro
 				ctx.player().inventory.currentItem = hoeSlot;
 			}
 			goalz.add(new GoalBlock(pos.up()));
+			if(ctx.isLookingAt(pos))
+			{
+				baritone.getInputOverrideHandler().setInputForceState(Input.CLICK_RIGHT, true);
+			}
 		}
 
 		return new PathingCommand(new GoalComposite(goalz.toArray(new Goal[0])), PathingCommandType.SET_GOAL_AND_PATH);
