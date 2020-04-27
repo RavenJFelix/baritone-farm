@@ -19,7 +19,7 @@ public class TillCommand extends Command
 	@Override
 	public void execute(String label, IArgConsumer args) throws CommandException
 	{
-		args.requireExactly(0);
+		baritone.getTillProcess().till();
 
 		logDirect("Tilling! fuck fuck fuck!");
 
