@@ -1,5 +1,8 @@
 package baritone.process;
 
+import baritone.api.pathing.goals.Goal;
+import baritone.api.pathing.goals.GoalBlock;
+import baritone.api.pathing.goals.GoalComposite;
 import baritone.utils.BaritoneProcessHelper;
 import baritone.Baritone;
 import baritone.cache.WorldScanner;
@@ -28,10 +31,10 @@ import java.util.ArrayList;
 import java.util.Optional;
 public final class TillProcess extends BaritoneProcessHelper implements ITillProcess
 {
-	private boolean active;
+	private boolean active = false;
 	private List<BlockPos> locations;
 
-	private int tickCount;
+	private int tickCount = 0;
 
 	/*private enum Tillable
 	{
@@ -70,6 +73,7 @@ public final class TillProcess extends BaritoneProcessHelper implements ITillPro
 		{
 			return new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
 		}
+		
 
 
 
@@ -78,12 +82,13 @@ public final class TillProcess extends BaritoneProcessHelper implements ITillPro
 		{
 			IBlockState state = ctx.world().getBlockState(pos);
 			boolean airAbove = ctx.world().getBlockState(pos.up()).getBlock() instanceof BlockAir ;
-			if(state.getBlock() == Blocks.DIRT)
+			if(state.getBlock() == Blocks.DIRT && airAbove)
 			{
 				toTill.add(pos);
 			}
 		}
 
+		List<Goal> goalz = new ArrayList<>();
 		baritone.getInputOverrideHandler().clearAllKeys();
 		for(BlockPos pos : toTill)
 		{
@@ -103,10 +108,11 @@ public final class TillProcess extends BaritoneProcessHelper implements ITillPro
 				}
 				ctx.player().inventory.currentItem = hoeSlot;
 			}
+			goalz.add(new GoalBlock(pos.up()));
 		}
 
+		return new PathingCommand(new GoalComposite(goalz.toArray(new Goal[0])), PathingCommandType.SET_GOAL_AND_PATH);
 
-		return null;
 	}
 	@Override
 	public String displayName0()
