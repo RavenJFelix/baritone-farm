@@ -69,6 +69,7 @@ public class Baritone implements IBaritone {
     private InventoryBehavior inventoryBehavior;
     private InputOverrideHandler inputOverrideHandler;
 
+	private TillProcess tillProcess;
     private FollowProcess followProcess;
     private MineProcess mineProcess;
     private GetToBlockProcess getToBlockProcess;
@@ -112,6 +113,7 @@ public class Baritone implements IBaritone {
             exploreProcess = new ExploreProcess(this);
             backfillProcess = new BackfillProcess(this);
             farmProcess = new FarmProcess(this);
+			tillProcess= new TillProcess(this);
         }
 
         this.worldProvider = new WorldProvider();
@@ -187,6 +189,11 @@ public class Baritone implements IBaritone {
     public FarmProcess getFarmProcess() {
         return this.farmProcess;
     }
+
+	public TillProcess getTillProcess()
+	{
+		return this.tillProcess;
+	}
 
     @Override
     public PathingBehavior getPathingBehavior() {
