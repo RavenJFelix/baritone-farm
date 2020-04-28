@@ -137,7 +137,7 @@ public final class RotationUtils {
      * @see #reachable(EntityPlayerSP, BlockPos, double)
      */
     public static Optional<Rotation> reachable(IPlayerContext ctx, BlockPos pos) {
-        return reachable(ctx.player(), pos, ctx.playerController().getBlockReachDistance());
+        return reachable(ctx.player(), pos, 0.95*ctx.playerController().getBlockReachDistance()); //Safe reaching
     }
 
     /**
