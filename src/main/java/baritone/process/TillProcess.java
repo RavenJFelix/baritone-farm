@@ -78,6 +78,7 @@ public final class TillProcess extends BaritoneProcessHelper implements ITillPro
 
 
 		List<BlockPos> toTill = new ArrayList<>();
+		List<BlockPos> tillable = new ArrayList<>();
 		for(BlockPos pos : locations)
 		{
 			IBlockState state = ctx.world().getBlockState(pos);
@@ -85,18 +86,12 @@ public final class TillProcess extends BaritoneProcessHelper implements ITillPro
 			if(state.getBlock() == Blocks.DIRT && airAbove)
 			{
 				toTill.add(pos);
+				if(pos.getY() <= ctx.playerHead().y)
+				{
+					tillable.add(pos);
+				}
 			}
 		}
-
-		List<Goal> goalz = new ArrayList<>();
-		baritone.getInputOverrideHandler().clearAllKeys();
-		for(BlockPos pos : toTill)
-		{
-			Optional<Rotation> rot = RotationUtils.reachable(ctx, pos);
-			if(rot.isPresent() && isSafeToCancel)
-			{
-				baritone.getLookBehavior().updateTarget(rot.get(), true);
-
 				int hoeSlot = 0;
 				for (int i = 0; i < 9; ++i)
 				{
@@ -108,12 +103,26 @@ public final class TillProcess extends BaritoneProcessHelper implements ITillPro
 					}
 				}
 				ctx.player().inventory.currentItem = hoeSlot;
+		List<Goal> goalz = new ArrayList<>();
+		baritone.getInputOverrideHandler().clearAllKeys();
+		for(BlockPos pos : tillable)
+		{
+			Optional<Rotation> rot = RotationUtils.reachable(ctx, pos);
+			if(rot.isPresent() && isSafeToCancel)
+			{
+				baritone.getLookBehavior().updateTarget(rot.get(), true);
+
+				
 			}
-			goalz.add(new GoalBlock(pos.up()));
 			if(ctx.isLookingAt(pos))
 			{
 				baritone.getInputOverrideHandler().setInputForceState(Input.CLICK_RIGHT, true);
 			}
+		}
+
+		for(BlockPos pos: toTill)
+		{
+			goalz.add(new GoalBlock(pos.up()));
 		}
 
 		return new PathingCommand(new GoalComposite(goalz.toArray(new Goal[0])), PathingCommandType.SET_GOAL_AND_PATH);
