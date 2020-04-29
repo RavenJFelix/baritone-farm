@@ -78,6 +78,7 @@ public class Baritone implements IBaritone {
     private ExploreProcess exploreProcess;
     private BackfillProcess backfillProcess;
     private FarmProcess farmProcess;
+	private NetherLoopProcess netherLoopProcess;
 
     private PathingControlManager pathingControlManager;
     private SelectionManager selectionManager;
@@ -89,6 +90,7 @@ public class Baritone implements IBaritone {
     public BlockStateInterface bsi;
 
     Baritone() {
+
         this.gameEventHandler = new GameEventHandler(this);
 
         // Define this before behaviors try and get it, or else it will be null and the builds will fail!
@@ -167,6 +169,11 @@ public class Baritone implements IBaritone {
     public BuilderProcess getBuilderProcess() {
         return this.builderProcess;
     }
+
+	public NetherLoopProcess getNetherLoopProcess()
+	{
+		return netherLoopProcess;
+	}
 
     public InventoryBehavior getInventoryBehavior() {
         return this.inventoryBehavior;
