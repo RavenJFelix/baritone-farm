@@ -66,7 +66,8 @@ public final class DefaultCommands {
             new CommandAlias(baritone, "home", "Set goal to your home waypoint", "waypoints goal home"),
             new SelCommand(baritone),
 			new FuckCommand(baritone),
-			new TillCommand(baritone)
+			new TillCommand(baritone),
+			new NetherLoopCommand(baritone)
         ));
         PauseResumeCommands prc = new PauseResumeCommands(baritone);
         commands.add(prc.pauseCommand);
