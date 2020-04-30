@@ -116,6 +116,7 @@ public class Baritone implements IBaritone {
             backfillProcess = new BackfillProcess(this);
             farmProcess = new FarmProcess(this);
 			tillProcess= new TillProcess(this);
+			netherLoopProcess = new NetherLoopProcess(this);
         }
 
         this.worldProvider = new WorldProvider();
@@ -170,6 +171,7 @@ public class Baritone implements IBaritone {
         return this.builderProcess;
     }
 
+	@Override
 	public NetherLoopProcess getNetherLoopProcess()
 	{
 		return netherLoopProcess;
