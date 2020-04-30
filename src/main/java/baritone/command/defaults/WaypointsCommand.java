@@ -296,7 +296,7 @@ public class WaypointsCommand extends Command {
         );
     }
 
-    private enum Action {
+    public enum Action {
         LIST("list", "get", "l"),
         CLEAR("clear", "c"),
         SAVE("save", "s"),
