@@ -1,3 +1,5 @@
+package baritone.process;
+
 import baritone.api.process.INetherLoopProcess;
 
 import baritone.utils.BaritoneProcessHelper;
@@ -12,6 +14,7 @@ import net.minecraft.util.math.BlockPos;
 public final class NetherLoopProcess extends BaritoneProcessHelper implements INetherLoopProcess
 {
 
+
 	private boolean active = false;
 	private BlockPos netherEntryPoint;
 	private BlockPos netherExitPoint;
@@ -21,6 +24,17 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		NETHER_ENTRY,
 		NETHER_EXIT
 	};
+
+	@Override
+	public void setNetherEntryPoint(BlockPos pos)
+	{
+		netherEntryPoint = pos;
+	}
+
+	public void setNetherExitPoint(BlockPos pos)
+	{
+		netherExitPoint = pos;
+	}
 
 	private objective dimensionalContex()
 	{
@@ -47,8 +61,18 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	public void netherLoop()
 	{
 		active = true;
-		netherEntryPoint = null;
-		netherExitPoint = null;
+		for (IWaypoint waypoint : waypoints)
+          {
+              if(waypoint.getName().equals("nether_entry"))
+              {
+                  baritone.getNetherLoopProcess().setNetherEntryPoint(waypoint.getLocation());
+              }
+              else if(waypoint.getName().equals("nether_exit"))
+              {
+                  baritone.getNetherLoopProcess().setNetherExitPoint(waypoint.getLocation());
+              }
+          }
+
 	}
 
 
@@ -65,6 +89,10 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		else if(dimensionalContex() == objective.NETHER_EXIT)
 		{
 			goal = new GoalBlock(netherExitPoint);
+		}
+		else
+		{
+			goal = new GoalBlock(0,0,0);
 		}
 
 		return new PathingCommand(goal, PathingCommandType.SET_GOAL_AND_PATH);
