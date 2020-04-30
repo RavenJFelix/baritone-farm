@@ -64,6 +64,8 @@ public interface IBaritone {
      */
     IBuilderProcess getBuilderProcess();
 
+	INetherLoopProcess getNetherLoopProcess();
+
     /**
      * @return The {@link IExploreProcess} instance
      * @see IExploreProcess
