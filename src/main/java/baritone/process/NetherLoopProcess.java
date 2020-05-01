@@ -202,17 +202,25 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 	private void mine(boolean isSafeToCancel)
 	{
-		logDirect("mine");
+		//logDirect("mine");
 
 		ArrayList<Block> scan = new ArrayList<>();
 		scan.add(Blocks.OBSIDIAN);
 		if(Baritone.settings().mineGoalUpdateInterval.value != 0  && tickCount++ % Baritone.settings().mineGoalUpdateInterval.value == 0)
 		{
+			portalFrameObsidian.clear();
+			logDirect("Scanning");
+			
 			Baritone.getExecutor().execute(()->locations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, 10, 10));
+		}
+		if(locations == null)
+		{
+			pathingCommand = new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
+			return;
 		}
 		for(BlockPos pos: locations)
 		{
-			if (inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
+			//if (inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
 			{
 				portalFrameObsidian.add(pos);
 			}
@@ -226,7 +234,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		goalz = new ArrayList<>();
 		if(droppedObsidian.isEmpty() && portalFrameObsidian.isEmpty())
 				{
-					//objective = Objective.NETHER_ENTRY;
+					objective = Objective.NETHER_ENTRY;
 					logDirect("NO OBSIDIAN FUCK");
 					return;
 				}
@@ -295,7 +303,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 	private boolean inBetweenInclusive(int num1, int num2, int possible)
 	{
-		if(num1 <= possible && possible <= num2 || num1 >= possible && possible >= num2)
+		if((num1 <= possible && possible <= num2) || (num1 >= possible && possible >= num2))
 		{
 			return true;
 		}
