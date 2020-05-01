@@ -25,7 +25,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.List;
 import java.util.Collections;
@@ -44,7 +43,6 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	private boolean active = false;
 	private BlockPos netherEntryPoint;
 	private BlockPos netherExitPoint;
-	private BlockPos portalMinePoint;
 	private PathingCommand pathingCommand = null;
 	private BlockPos preMinePos = null;
 	private BlockPos mineFieldCorner1;
@@ -66,11 +64,6 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	public void setNetherEntryPoint(BlockPos pos)
 	{
 		netherEntryPoint = pos;
-	}
-	@Override
-	public void setPortalMinePoint(BlockPos pos)
-	{
-		portalMinePoint = pos;
 	}
 
 	@Override
@@ -122,7 +115,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		switch(objective)
 		{
 			case NETHER_EXIT:
-				netherExit(isSafeToCancel);
+				netherExit();
 				break;
 			case NETHER_ENTRY:
 				netherEntry();
@@ -142,20 +135,16 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		return pathingCommand;
 	}
 
-	private void netherExit(boolean isSafeToCancel)
+	private void netherExit()
 	{
 		logDirect("netherExit");
-		int dim = ctx.player().dimension;
-		//logDirect(new Integer(dim).toString());
-		boolean overworld = (dim == 0);
-		//logDirect(String.valueOf(overworld));
-
-		if(overworld && ctx.world().isBlockLoaded(ctx.playerFeet().down()))
+		if(ctx.player().dimension == 0)
 		{
 			objective = Objective.PRE_MINE_INIT;
+			return;
 		}
-		pathingCommand = new PathingCommand(new GoalBlock(netherExitPoint), PathingCommandType.SET_GOAL_AND_PATH);
 		
+		pathingCommand = new PathingCommand(new GoalBlock(netherExitPoint), PathingCommandType.SET_GOAL_AND_PATH);
 	}
 
 	private void netherEntry()
@@ -173,13 +162,12 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 	private void preMineInit()
 	{
-		logDirect("Sigil");
 		logDirect(ctx.player().getPosition().toString());
 		logDirect("init premine");
-		preMinePos = portalMinePoint; //ctx.playerFeet().add(new BlockPos(1.0,0.0, 1.0));
-		mineFieldCorner1 = portalMinePoint.add(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
+		preMinePos = ctx.playerFeet().add(new BlockPos(1.0,0.0, 1.0));
+		mineFieldCorner1 = ctx.playerFeet().add(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
 		//I'm a dirty bitch.
-		mineFieldCorner2 = portalMinePoint.subtract(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
+		mineFieldCorner2 = ctx.playerFeet().subtract(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
 		objective = Objective.PRE_MINE;
 
 		preMine();
@@ -189,7 +177,6 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	private void preMine()
 	{
 		//logDirect("premine");
-		logDirect(ctx.playerFeet().toString());
 		if(ctx.playerFeet().equals(preMinePos))
 		{
 			objective = Objective.MINE;
@@ -203,16 +190,16 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	private void mine(boolean isSafeToCancel)
 	{
 		logDirect("mine");
-
+		locations = null;
 		ArrayList<Block> scan = new ArrayList<>();
 		scan.add(Blocks.OBSIDIAN);
-		if(Baritone.settings().mineGoalUpdateInterval.value != 0  && tickCount++ % Baritone.settings().mineGoalUpdateInterval.value == 0)
+		//if(Baritone.settings().mineGoalUpdateInterval.value != 0  && tickCount++ % Baritone.settings().mineGoalUpdateInterval.value == 0)
 		{
 			Baritone.getExecutor().execute(()->locations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, 10, 10));
 		}
 		for(BlockPos pos: locations)
 		{
-			if (inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
+			//if (inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
 			{
 				portalFrameObsidian.add(pos);
 			}

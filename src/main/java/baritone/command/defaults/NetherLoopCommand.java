@@ -12,6 +12,9 @@ import baritone.api.command.datatypes.BlockById;
 import java.util.stream.Stream;
 import java.util.List;
 import java.util.Arrays;
+
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 public class NetherLoopCommand extends Command
 {
 	public NetherLoopCommand(IBaritone baritone) {
@@ -31,11 +34,24 @@ public class NetherLoopCommand extends Command
 		{
 			if(waypoint.getName().equals("nether_entry"))
 			{
+				ITextComponent netherEntryMsg = new TextComponentString("Nether Entry ");
+				netherEntryMsg.appendText(waypoint.toString());
+				logDirect(netherEntryMsg);
 				baritone.getNetherLoopProcess().setNetherEntryPoint(waypoint.getLocation());
 			}
 			else if(waypoint.getName().equals("nether_exit"))
 			{
+				ITextComponent netherExitMsg = new TextComponentString("Nether Exit");
+				netherExitMsg.appendText(waypoint.toString());
+				logDirect(netherExitMsg);
 				baritone.getNetherLoopProcess().setNetherExitPoint(waypoint.getLocation());
+			}
+			else if(waypoint.getName().equals("portal_mine"))
+			{
+				ITextComponent netherExitMsg = new TextComponentString("Portal Mine");
+				netherExitMsg.appendText(waypoint.toString());
+				logDirect(netherExitMsg);
+				baritone.getNetherLoopProcess().setPortalMinePoint(waypoint.getLocation());
 			}
 		}
 
