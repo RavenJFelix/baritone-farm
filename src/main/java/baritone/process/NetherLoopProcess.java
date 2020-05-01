@@ -35,6 +35,8 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.block.BlockPortal;
 
+import java.io.*;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,7 +52,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	private BlockOptionalMetaLookup filter;
 
 	private List<BlockPos> locations;
-	private final int MINE_FIELD_RADIUS = 10;
+	private final int MINE_FIELD_RADIUS = 5;
 	private int tickCount = 0;
 	private boolean active = false;
 	private BlockPos netherEntryPoint;
@@ -130,7 +132,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	@Override 
 	public PathingCommand onTick(boolean calcFailed, boolean isSafeToCancel)
 	{
-		printIfPortalBlock();
+		//printIfPortalBlock();
 		switch(objective)
 		{
 			case NETHER_EXIT:
@@ -146,7 +148,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 				preMine();
 				break;
 			case MINE:
-				mine(isSafeToCancel);
+				//mine(isSafeToCancel);
 				break;
 
 		}
@@ -186,16 +188,12 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	private void preMineInit()
 	{
 		logDirect("Sigil");
-		//logDirect(ctx.player().getPosition().toString());
+		logDirect(ctx.player().getPosition().toString());
 		logDirect("init premine");
-		preMinePos = portalMinePoint; //ctx.playerFeet().add(new BlockPos(1.0,0.0, 1.0));
-		mineFieldCorner1 = portalMinePoint.add(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
-		//I'm a dirty bitch.
-		mineFieldCorner2 = portalMinePoint.subtract(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
 		objective = Objective.PRE_MINE;
 
-		logDirect(mineFieldCorner1.toString());
-		logDirect(mineFieldCorner2.toString());
+		//logDirect(mineFieldCorner1.toString());
+		//logDirect(mineFieldCorner2.toString());
 		preMine();
 
 	}
@@ -204,36 +202,74 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	{
 		//logDirect("premine");
 		//logDirect(ctx.playerFeet().toString());
+		EnumFacing.Axis direct = EnumFacing.Axis.X;
 		IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
+		if(! ctx.world().isBlockLoaded(ctx.playerFeet(), false))
+		{
+			return;
+		}
 
-		EnumFacing.Axis direct =(EnumFacing.Axis) blockAtFeet.getProperties().get(
+
+		try
+		{
+			direct = (EnumFacing.Axis) blockAtFeet.getProperties().get(
 					blockAtFeet.getPropertyKeys().toArray()[0]);
+		}
+		catch(Exception e)
+		{
+			logDirect("Fuck");
+		}
+
 			if(direct != null)
 			{
 				logDirect(direct.toString());
 			}
+			else
+			{
+				logDirect("wtf");
+				return;
+			}
 		if(ctx.world().getBlockState(ctx.playerFeet()).getBlock().equals(Blocks.PORTAL))
 		{
+			baritone.getInputOverrideHandler().clearAllKeys();
 			switch(direct)
 			{
 				case Z : //HEY CHARLIE!!!
+					baritone.getLookBehavior().updateTarget(
+							RotationUtils.calcRotationFromCoords(ctx.playerFeet(), 
+								ctx.playerFeet().add(0,0,1)), true); //Cheap way of getting rotation
+					//in the Z axis;
+
+				case X : //HEY CHARLIE!!!
+					baritone.getLookBehavior().updateTarget(
+							RotationUtils.calcRotationFromCoords(ctx.playerFeet(), 
+								ctx.playerFeet().add(1,0,0)), true);
+
 			}
+			baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_FORWARD, true);
+			return;
 		}
 		else
 		{
-			if(blockAtFeet.getBlock() instanceof BlockPortal)
-			{
-			}
+			preMinePos = ctx.playerFeet();
+
+			mineFieldCorner1 = preMinePos.add(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
+		//I'm a dirty bitch.
+			mineFieldCorner2 = preMinePos.subtract(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
+			logDirect(mineFieldCorner1.toString());
+			logDirect(mineFieldCorner2.toString());
+			objective = Objective.MINE;
 		}
 
 
 
-		pathingCommand = new PathingCommand(new GoalBlock(preMinePos), PathingCommandType.SET_GOAL_AND_PATH);
+		pathingCommand = new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
 
 
 	}
 	private void printIfPortalBlock()
 	{
+		pathingCommand = new PathingCommand(new GoalBlock(ctx.playerFeet()), PathingCommandType.CANCEL_AND_SET_GOAL);
 		IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
 		if(blockAtFeet.getBlock() instanceof BlockPortal)
 		{
@@ -250,6 +286,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 			}
 
 
+
 		}
 	}
 
@@ -264,7 +301,8 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 			portalFrameObsidian.clear();
 			//logDirect("Scanning");
 			
-			Baritone.getExecutor().execute(()->locations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, 10, 10));
+			Baritone.getExecutor().execute(()->locations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, -1, 6));
+
 		}
 		if(locations == null)
 		{
@@ -310,8 +348,15 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 			{
 				
 				{
+					for(BlockPos droppedPos: droppedObsidian)
+					{
+						if(inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, droppedPos))
+						{
+							//placesToGo.add(droppedPos);
+						}
+					}
 					placesToGo.addAll(portalFrameObsidian);
-					placesToGo.addAll(droppedObsidian);
+					//placesToGo.addAll(droppedObsidian);
 					for(BlockPos position: placesToGo)
 					{
 						goalz.add(new GoalBlock(position));
