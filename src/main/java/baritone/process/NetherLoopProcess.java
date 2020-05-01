@@ -39,7 +39,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	private BlockOptionalMetaLookup filter;
 
 	private List<BlockPos> locations;
-	private final int MINE_FIELD_RADIUS = 4;
+	private final int MINE_FIELD_RADIUS = 5;
 	private int tickCount = 0;
 	private boolean active = false;
 	private BlockPos netherEntryPoint;
@@ -174,7 +174,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	private void preMineInit()
 	{
 		logDirect("Sigil");
-		logDirect(ctx.player().getPosition().toString());
+		//logDirect(ctx.player().getPosition().toString());
 		logDirect("init premine");
 		preMinePos = portalMinePoint; //ctx.playerFeet().add(new BlockPos(1.0,0.0, 1.0));
 		mineFieldCorner1 = portalMinePoint.add(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
@@ -182,6 +182,8 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		mineFieldCorner2 = portalMinePoint.subtract(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
 		objective = Objective.PRE_MINE;
 
+		logDirect(mineFieldCorner1.toString());
+		logDirect(mineFieldCorner2.toString());
 		preMine();
 
 	}
@@ -189,7 +191,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	private void preMine()
 	{
 		//logDirect("premine");
-		logDirect(ctx.playerFeet().toString());
+		//logDirect(ctx.playerFeet().toString());
 		if(ctx.playerFeet().equals(preMinePos))
 		{
 			objective = Objective.MINE;
@@ -209,7 +211,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		if(Baritone.settings().mineGoalUpdateInterval.value != 0  && tickCount++ % Baritone.settings().mineGoalUpdateInterval.value == 0)
 		{
 			portalFrameObsidian.clear();
-			logDirect("Scanning");
+			//logDirect("Scanning");
 			
 			Baritone.getExecutor().execute(()->locations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, 10, 10));
 		}
@@ -220,7 +222,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		}
 		for(BlockPos pos: locations)
 		{
-			//if (inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
+			if (inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
 			{
 				portalFrameObsidian.add(pos);
 			}
@@ -319,8 +321,8 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	private boolean inBetweenInclusive(BlockPos pos1, BlockPos pos2, BlockPos possible)
 	{
 		if(inBetweenInclusive(pos1.getX(), pos2.getX(), possible.getX())
-					&& inBetweenInclusive(pos1.getY(), pos2.getX(), possible.getX())
-					&& inBetweenInclusive(pos1.getZ(), pos2.getX(), possible.getX())
+					&& inBetweenInclusive(pos1.getY(), pos2.getY(), possible.getY())
+					&& inBetweenInclusive(pos1.getZ(), pos2.getZ(), possible.getZ())
 					)
 		{return true;} //Oh yes feel the dirt. feel so dirt Love the dirt.
 		else {return false;} //Mmmmmmmm
