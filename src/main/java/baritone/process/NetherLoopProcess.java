@@ -7,6 +7,10 @@ import baritone.Baritone;
 import baritone.api.process.PathingCommand;
 import baritone.api.process.PathingCommandType;
 import baritone.cache.WorldScanner;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumFacing.Axis;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyEnum;
 
 import baritone.api.pathing.goals.Goal;
 import baritone.api.utils.RayTraceUtils;
@@ -19,18 +23,25 @@ import baritone.api.utils.BlockOptionalMeta;
 import baritone.api.pathing.goals.GoalComposite;
 import baritone.pathing.movement.MovementHelper;
 
+import net.minecraft.block.state.IBlockProperties;
+import net.minecraft.block.material.MaterialPortal;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockAir;
 import net.minecraft.init.Blocks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.BlockPortal;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Collection;
 public final class NetherLoopProcess extends BaritoneProcessHelper implements INetherLoopProcess
 {
 
@@ -39,7 +50,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	private BlockOptionalMetaLookup filter;
 
 	private List<BlockPos> locations;
-	private final int MINE_FIELD_RADIUS = 5;
+	private final int MINE_FIELD_RADIUS = 10;
 	private int tickCount = 0;
 	private boolean active = false;
 	private BlockPos netherEntryPoint;
@@ -119,6 +130,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	@Override 
 	public PathingCommand onTick(boolean calcFailed, boolean isSafeToCancel)
 	{
+		printIfPortalBlock();
 		switch(objective)
 		{
 			case NETHER_EXIT:
@@ -144,7 +156,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 	private void netherExit(boolean isSafeToCancel)
 	{
-		logDirect("netherExit");
+		//logDirect("netherExit");
 		int dim = ctx.player().dimension;
 		//logDirect(new Integer(dim).toString());
 		boolean overworld = (dim == 0);
@@ -160,7 +172,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 	private void netherEntry()
 	{
-		logDirect("Nether Entry");
+		//logDirect("Nether Entry");
 
 		if(ctx.player().dimension == -1)
 		{
@@ -192,14 +204,53 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	{
 		//logDirect("premine");
 		//logDirect(ctx.playerFeet().toString());
-		if(ctx.playerFeet().equals(preMinePos))
+		IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
+
+		EnumFacing.Axis direct =(EnumFacing.Axis) blockAtFeet.getProperties().get(
+					blockAtFeet.getPropertyKeys().toArray()[0]);
+			if(direct != null)
+			{
+				logDirect(direct.toString());
+			}
+		if(ctx.world().getBlockState(ctx.playerFeet()).getBlock().equals(Blocks.PORTAL))
 		{
-			objective = Objective.MINE;
+			switch(direct)
+			{
+				case Z : //HEY CHARLIE!!!
+			}
 		}
+		else
+		{
+			if(blockAtFeet.getBlock() instanceof BlockPortal)
+			{
+			}
+		}
+
+
 
 		pathingCommand = new PathingCommand(new GoalBlock(preMinePos), PathingCommandType.SET_GOAL_AND_PATH);
 
 
+	}
+	private void printIfPortalBlock()
+	{
+		IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
+		if(blockAtFeet.getBlock() instanceof BlockPortal)
+		{
+			logDirect(blockAtFeet.getPropertyKeys().toString());
+			ArrayList<EnumFacing.Axis> facing = new ArrayList<>();
+			
+			
+
+			EnumFacing.Axis direct =(EnumFacing.Axis) blockAtFeet.getProperties().get(
+					blockAtFeet.getPropertyKeys().toArray()[0]);
+			if(direct != null)
+			{
+				logDirect(direct.toString());
+			}
+
+
+		}
 	}
 
 	private void mine(boolean isSafeToCancel)
@@ -208,7 +259,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 		ArrayList<Block> scan = new ArrayList<>();
 		scan.add(Blocks.OBSIDIAN);
-		if(Baritone.settings().mineGoalUpdateInterval.value != 0  && tickCount++ % Baritone.settings().mineGoalUpdateInterval.value == 0)
+		//if(Baritone.settings().mineGoalUpdateInterval.value != 0  && tickCount++ % Baritone.settings().mineGoalUpdateInterval.value == 0)
 		{
 			portalFrameObsidian.clear();
 			//logDirect("Scanning");
