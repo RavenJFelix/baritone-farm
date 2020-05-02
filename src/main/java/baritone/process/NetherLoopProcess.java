@@ -210,12 +210,6 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 			logDirect("init premine");
 			logDirect(ctx.player().getPosition().toString());
 			objective = Objective.PRE_MINE;
-
-			//logDirect(mineFieldCorner1.toString());
-			//logDirect(mineFieldCorner2.toString());
-			//pathingCommand = new PathingCommand(null, PathingCommandType.CANCEL_AND_SET_GOAL);
-			return;
-
 		}
 
 		private void preMine()
