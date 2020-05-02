@@ -13,7 +13,7 @@ public class BlockZone
 	private BlockPos corner1;
 	private BlockPos corner2;
 
-	BlockZone(BlockPos newCorner1, BlockPos newCorner2)
+	public BlockZone(BlockPos newCorner1, BlockPos newCorner2)
 	{
 		corner1 = newCorner1;
 		corner2 = newCorner2;
