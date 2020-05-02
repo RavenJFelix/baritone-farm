@@ -216,18 +216,14 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		{
 			IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
 
-			EnumFacing.Axis playerAxis;
 			if(! ctx.world().isBlockLoaded(ctx.playerFeet(), false))
 			{
 				logDirect("nullified");
 				pathingCommand = new PathingCommand(null, PathingCommandType.CANCEL_AND_SET_GOAL);
 				return;
 			}
-			else
-			{
-			}
 
-
+			EnumFacing.Axis playerAxis;
 			try
 			{
 				playerAxis = (EnumFacing.Axis) blockAtFeet.getProperties().get(
@@ -238,15 +234,6 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 				logDirect("Fuck");
 			}
 
-			if(playerAxis != null)
-			{
-				//logDirect(direct.toString());
-			}
-			else
-			{
-				logDirect("wtf");
-				return;
-			}
 			if(ctx.world().getBlockState(ctx.playerFeet()).getBlock().equals(Blocks.PORTAL))
 			{
 				/*
