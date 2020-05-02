@@ -215,15 +215,19 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		private void preMine()
 		{
 			IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
+
+			EnumFacing.Axis playerAxis;
 			if(! ctx.world().isBlockLoaded(ctx.playerFeet(), false))
 			{
 				logDirect("nullified");
 				pathingCommand = new PathingCommand(null, PathingCommandType.CANCEL_AND_SET_GOAL);
 				return;
 			}
+			else
+			{
+			}
 
 
-			EnumFacing.Axis playerAxis = EnumFacing.Axis.X;
 			try
 			{
 				playerAxis = (EnumFacing.Axis) blockAtFeet.getProperties().get(
