@@ -214,9 +214,6 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 		private void preMine()
 		{
-			//logDirect("premine");
-			//logDirect(ctx.playerFeet().toString());
-			EnumFacing.Axis direct = EnumFacing.Axis.X;
 			IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
 			if(! ctx.world().isBlockLoaded(ctx.playerFeet(), false))
 			{
@@ -226,9 +223,10 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 			}
 
 
+			EnumFacing.Axis playerAxis = EnumFacing.Axis.X;
 			try
 			{
-				direct = (EnumFacing.Axis) blockAtFeet.getProperties().get(
+				playerAxis = (EnumFacing.Axis) blockAtFeet.getProperties().get(
 						blockAtFeet.getPropertyKeys().toArray()[0]);
 			}
 			catch(Exception e)
@@ -236,7 +234,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 				logDirect("Fuck");
 			}
 
-			if(direct != null)
+			if(playerAxis != null)
 			{
 				//logDirect(direct.toString());
 			}
