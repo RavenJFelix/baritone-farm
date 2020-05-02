@@ -22,6 +22,7 @@ import baritone.api.utils.BlockOptionalMetaLookup;
 import baritone.api.utils.BlockOptionalMeta;
 import baritone.api.pathing.goals.GoalComposite;
 import baritone.pathing.movement.MovementHelper;
+import baritone.api.utils.BlockZone;
 
 import net.minecraft.block.state.IBlockProperties;
 import net.minecraft.block.material.MaterialPortal;
@@ -451,32 +452,4 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 	{
 		active = false;
 	}
-
-	private boolean inBetweenInclusive(int num1, int num2, int possible)
-	{
-		if((num1 <= possible && possible <= num2) || (num1 >= possible && possible >= num2))
-		{
-			return true;
-		}
-		else if (possible == num1 || possible == num2)
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	private boolean inBetweenInclusive(BlockPos pos1, BlockPos pos2, BlockPos possible)
-	{
-		if(inBetweenInclusive(pos1.getX(), pos2.getX(), possible.getX())
-					&& inBetweenInclusive(pos1.getY(), pos2.getY(), possible.getY())
-					&& inBetweenInclusive(pos1.getZ(), pos2.getZ(), possible.getZ())
-					)
-		{return true;} //Oh yes feel the dirt. feel so dirt Love the dirt.
-		else {return false;} //Mmmmmmmm
-	}
-
-
-	
 }
