@@ -1,12 +1,13 @@
 package baritone.api.utils;
 
+import baritone.api.utils.math.MathHelper;
+import net.minecraft.util.math.BlockPos;
+
+
 /**
  * @author RavenJyroFelix
  * @since 02/05/2020
  */
-
-import net.minecraft.util.math.BlockPos;
-
 public class BlockZone
 {
 	private BlockPos corner1;
@@ -36,6 +37,11 @@ public class BlockZone
 	public void setCorner2(BlockPos newCorner2)
 	{
 		corner2 = newCorner2;
+	}
+
+	public boolean isInsideMineZone(BlockPos possible)
+	{
+		return MathHelper.inBetweenInclusive(corner1, corner2, possible);
 	}
 
 }   
