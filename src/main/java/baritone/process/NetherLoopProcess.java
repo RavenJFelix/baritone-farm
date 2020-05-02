@@ -196,8 +196,8 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		}
 		else if(ctx.player().dimension == -1)
 		{
-				logDirect("Nether Entry");
-				objective = Objective.NETHER_EXIT;
+			logDirect("Nether Entry");
+			objective = Objective.NETHER_EXIT;
 		}
 		else
 		{
@@ -205,230 +205,227 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		}
 	}
 
-		private void preMineInit()
+	private void preMineInit()
+	{
+		logDirect("init premine");
+		logDirect(ctx.player().getPosition().toString());
+		objective = Objective.PRE_MINE;
+	}
+
+	private void preMine()
+	{
+		IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
+
+		if(! ctx.world().isBlockLoaded(ctx.playerFeet(), false))
 		{
-			logDirect("init premine");
-			logDirect(ctx.player().getPosition().toString());
-			objective = Objective.PRE_MINE;
+			logDirect("nullified");
+			pathingCommand = new PathingCommand(null, PathingCommandType.CANCEL_AND_SET_GOAL);
+			return;
 		}
 
-		private void preMine()
+		EnumFacing.Axis playerAxis;
+		try
 		{
-			IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
+			playerAxis = (EnumFacing.Axis) blockAtFeet.getProperties().get(
+					blockAtFeet.getPropertyKeys().toArray()[0]);
+		}
+		catch(Exception e)
+		{
+			logDirect("Fuck");
+		}
 
-			if(! ctx.world().isBlockLoaded(ctx.playerFeet(), false))
+		if(ctx.world().getBlockState(ctx.playerFeet()).getBlock().equals(Blocks.PORTAL))
+		{
+			switch(playerAxis)
 			{
-				logDirect("nullified");
-				pathingCommand = new PathingCommand(null, PathingCommandType.CANCEL_AND_SET_GOAL);
-				return;
-			}
-
-			EnumFacing.Axis playerAxis;
-			try
-			{
-				playerAxis = (EnumFacing.Axis) blockAtFeet.getProperties().get(
-						blockAtFeet.getPropertyKeys().toArray()[0]);
-			}
-			catch(Exception e)
-			{
-				logDirect("Fuck");
-			}
-
-			if(ctx.world().getBlockState(ctx.playerFeet()).getBlock().equals(Blocks.PORTAL))
-			{
-				/*
-				   switch(direct)
-				   {
-				   case Z : //HEY CHARLIE!!!
-				   baritone.getLookBehavior().updateTarget(
-				   RotationUtils.calcRotationFromCoords(ctx.playerFeet(), 
-				   ctx.playerFeet().add(0,0,1)), true); //Cheap way of getting rotation
-				//in the Z axis;
+				case Z : //HEY CHARLIE!!!
+					baritone.getLookBehavior().updateTarget(
+							RotationUtils.calcRotationFromCoords(ctx.playerFeet(), 
+								ctx.playerFeet().add(0,0,1)), true); //Cheap way of getting rotation
+					//in the Z axis;
 
 				case X : //HEY CHARLIE!!!
-				baritone.getLookBehavior().updateTarget(
-				RotationUtils.calcRotationFromCoords(ctx.playerFeet(), 
-				ctx.playerFeet().add(1,0,0)), true);
+					baritone.getLookBehavior().updateTarget(
+							RotationUtils.calcRotationFromCoords(ctx.playerFeet(), 
+								ctx.playerFeet().add(1,0,0)), true);
 
-				   }
-				   logDirect("Fucking forward");
-
-				   baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_LEFT, true);
-				   logDirect(new Boolean(baritone.getInputOverrideHandler().isInputForcedDown(Input.MOVE_LEFT)).toString());
-				   pathingCommand = new PathingCommand(new GoalBlock(ctx.playerFeet().add(1,0,1)), PathingCommandType.SET_GOAL_AND_PATH);
-
-
-				   return;
-				   */
-				preMinePos = ctx.playerFeet().add(1,0,1);
 			}
-			//else
-			{
+			logDirect("Fucking forward");
 
-				if(!ctx.playerFeet().equals(preMinePos))
-				{
-
-					baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_LEFT, true);
-					logDirect(new Boolean(baritone.getInputOverrideHandler().isInputForcedDown(Input.MOVE_LEFT)).toString());
-					pathingCommand = new PathingCommand(new GoalBlock(preMinePos), PathingCommandType.SET_GOAL_AND_PATH);
-					return;
-				}
-
-				preMinePos = ctx.playerFeet();
-
-				mineFieldCorner1 = preMinePos.add(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
-				//I'm a dirty bitch.
-				mineFieldCorner2 = preMinePos.subtract(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
-				logDirect(mineFieldCorner1.toString());
-				logDirect(mineFieldCorner2.toString());
-				baritone.getInputOverrideHandler().clearAllKeys();
-				objective = Objective.MINE;
-			}
+			baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_LEFT, true);
+			logDirect(new Boolean(baritone.getInputOverrideHandler().isInputForcedDown(Input.MOVE_LEFT)).toString());
+			pathingCommand = new PathingCommand(new GoalBlock(ctx.playerFeet().add(1,0,1)), PathingCommandType.SET_GOAL_AND_PATH);
 
 
-
-			//pathingCommand = new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
-
-
+			preMinePos = ctx.playerFeet().add(1,0,1);
 		}
-
-		private void printIfPortalBlock()
-		{
-			IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
-			if(blockAtFeet.getBlock() instanceof BlockPortal)
-			{
-				logDirect(blockAtFeet.getPropertyKeys().toString());
-				ArrayList<EnumFacing.Axis> facing = new ArrayList<>();
-
-
-
-				EnumFacing.Axis direct =(EnumFacing.Axis) blockAtFeet.getProperties().get(
-						blockAtFeet.getPropertyKeys().toArray()[0]);
-				if(direct != null)
-				{
-					logDirect(direct.toString());
-				}
-
-
-
-			}
-		}
-
-
-		private void updateObsidianLocation()
+		else
 		{
 
-			ArrayList<Block> scan = new ArrayList<>();
-			scan.add(Blocks.OBSIDIAN);
-
-			Baritone.getExecutor().execute(()->obsidianLocations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, -1, 6));
-		}
-		private void mine(boolean isSafeToCancel)
-		{
-			//logDirect("mine");
-
-			//if(Baritone.settings().mineGoalUpdateInterval.value != 0  && tickCount++ % Baritone.settings().mineGoalUpdateInterval.value == 0)
+			if(!ctx.playerFeet().equals(preMinePos))
 			{
-				portalFrameObsidian.clear();
-				//logDirect("Scanning");
 
-				updateObsidianLocation();
-
-			}
-			if(obsidianLocations == null)
-			{
+				baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_LEFT, true);
+				logDirect(new Boolean(baritone.getInputOverrideHandler().isInputForcedDown(Input.MOVE_LEFT)).toString());
+				pathingCommand = new PathingCommand(new GoalBlock(preMinePos), PathingCommandType.SET_GOAL_AND_PATH);
 				return;
 			}
-			for(BlockPos pos: obsidianLocations)
-			{
-				if (inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
-				{
-					portalFrameObsidian.add(pos);
-				}
-			}
 
+			preMinePos = ctx.playerFeet();
+
+			mineFieldCorner1 = preMinePos.add(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
+			//I'm a dirty bitch.
+			mineFieldCorner2 = preMinePos.subtract(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
+			logDirect(mineFieldCorner1.toString());
+			logDirect(mineFieldCorner2.toString());
 			baritone.getInputOverrideHandler().clearAllKeys();
-			List<BlockPos> allDroppedObsidian = droppedItemsScan();
-			List<BlockPos> droppedObsidian = new ArrayList<>();
-			for(BlockPos pos : allDroppedObsidian)
-			{
-
-				if(inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
-				{
-					droppedObsidian.add(pos);
-				}
-
-			}
-			List<BlockPos> placesToGo = new ArrayList<>();
-			List<Goal> goalz = new ArrayList<>();
-
-			goalz = new ArrayList<>();
-			if(droppedObsidian.isEmpty() && portalFrameObsidian.isEmpty())
-			{
-				objective = Objective.NETHER_ENTRY;
-				logDirect("NO OBSIDIAN FUCK");
-				return;
-			}
-			for(BlockPos pos : portalFrameObsidian)
-			{
-				Optional<Rotation> rot = RotationUtils.reachable(ctx, pos);
-				if(rot.isPresent() && isSafeToCancel)
-				{
-					baritone.getLookBehavior().updateTarget(rot.get(), true);
-				}
-
-				if(ctx.isLookingAt(pos))
-				{
-					MovementHelper.switchToBestToolFor(ctx,ctx.world().getBlockState(pos));
-					baritone.getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, true);
-					pathingCommand = new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
-					return;
-				}
-				else
-				{
-
-					{
-						placesToGo.addAll(portalFrameObsidian);
-						placesToGo.addAll(droppedObsidian);
-						for(BlockPos position: placesToGo)
-						{
-							goalz.add(new GoalBlock(position));
-						}
-						pathingCommand = new PathingCommand(new GoalComposite(goalz.toArray(new Goal[0])), PathingCommandType.SET_GOAL_AND_PATH);
-						return;
-
-					}
-
-				}
-
-			}
-
+			objective = Objective.MINE;
 		}
-		public List<BlockPos> droppedItemsScan() {
-			if (!Baritone.settings().mineScanDroppedItems.value) {
-				return Collections.emptyList();
-			}
-			List<BlockPos> ret = new ArrayList<>();
-			for (Entity entity : ctx.world().loadedEntityList) {
-				if (entity instanceof EntityItem) {
-					EntityItem ei = (EntityItem) entity;
-					if (filter.has(ei.getItem())) {
-						ret.add(new BlockPos(entity));
-					}
-				}
-			}
-			//ret.addAll(anticipatedDrops.keySet());
-			return ret;
-		}
-		@Override
-		public String displayName0()
+
+
+
+		//pathingCommand = new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
+
+
+	}
+
+	private void printIfPortalBlock()
+	{
+		IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
+		if(blockAtFeet.getBlock() instanceof BlockPortal)
 		{
-			return "I'm looping some fucking nether portalz!!!";
-		}
+			logDirect(blockAtFeet.getPropertyKeys().toString());
+			ArrayList<EnumFacing.Axis> facing = new ArrayList<>();
 
-		@Override
-		public void onLostControl()
-		{
-			active = false;
+
+
+			EnumFacing.Axis direct =(EnumFacing.Axis) blockAtFeet.getProperties().get(
+					blockAtFeet.getPropertyKeys().toArray()[0]);
+			if(direct != null)
+			{
+				logDirect(direct.toString());
+			}
+
+
+
 		}
 	}
+
+
+	private void updateObsidianLocation()
+	{
+
+		ArrayList<Block> scan = new ArrayList<>();
+		scan.add(Blocks.OBSIDIAN);
+
+		Baritone.getExecutor().execute(()->obsidianLocations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, -1, 6));
+	}
+	private void mine(boolean isSafeToCancel)
+	{
+		//logDirect("mine");
+
+		//if(Baritone.settings().mineGoalUpdateInterval.value != 0  && tickCount++ % Baritone.settings().mineGoalUpdateInterval.value == 0)
+		{
+			portalFrameObsidian.clear();
+			//logDirect("Scanning");
+
+			updateObsidianLocation();
+
+		}
+		if(obsidianLocations == null)
+		{
+			return;
+		}
+		for(BlockPos pos: obsidianLocations)
+		{
+			if (inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
+			{
+				portalFrameObsidian.add(pos);
+			}
+		}
+
+		baritone.getInputOverrideHandler().clearAllKeys();
+		List<BlockPos> allDroppedObsidian = droppedItemsScan();
+		List<BlockPos> droppedObsidian = new ArrayList<>();
+		for(BlockPos pos : allDroppedObsidian)
+		{
+
+			if(inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
+			{
+				droppedObsidian.add(pos);
+			}
+
+		}
+		List<BlockPos> placesToGo = new ArrayList<>();
+		List<Goal> goalz = new ArrayList<>();
+
+		goalz = new ArrayList<>();
+		if(droppedObsidian.isEmpty() && portalFrameObsidian.isEmpty())
+		{
+			objective = Objective.NETHER_ENTRY;
+			logDirect("NO OBSIDIAN FUCK");
+			return;
+		}
+		for(BlockPos pos : portalFrameObsidian)
+		{
+			Optional<Rotation> rot = RotationUtils.reachable(ctx, pos);
+			if(rot.isPresent() && isSafeToCancel)
+			{
+				baritone.getLookBehavior().updateTarget(rot.get(), true);
+			}
+
+			if(ctx.isLookingAt(pos))
+			{
+				MovementHelper.switchToBestToolFor(ctx,ctx.world().getBlockState(pos));
+				baritone.getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, true);
+				pathingCommand = new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
+				return;
+			}
+			else
+			{
+
+				{
+					placesToGo.addAll(portalFrameObsidian);
+					placesToGo.addAll(droppedObsidian);
+					for(BlockPos position: placesToGo)
+					{
+						goalz.add(new GoalBlock(position));
+					}
+					pathingCommand = new PathingCommand(new GoalComposite(goalz.toArray(new Goal[0])), PathingCommandType.SET_GOAL_AND_PATH);
+					return;
+
+				}
+
+			}
+
+		}
+
+	}
+	public List<BlockPos> droppedItemsScan() {
+		if (!Baritone.settings().mineScanDroppedItems.value) {
+			return Collections.emptyList();
+		}
+		List<BlockPos> ret = new ArrayList<>();
+		for (Entity entity : ctx.world().loadedEntityList) {
+			if (entity instanceof EntityItem) {
+				EntityItem ei = (EntityItem) entity;
+				if (filter.has(ei.getItem())) {
+					ret.add(new BlockPos(entity));
+				}
+			}
+		}
+		//ret.addAll(anticipatedDrops.keySet());
+		return ret;
+	}
+	@Override
+	public String displayName0()
+	{
+		return "I'm looping some fucking nether portalz!!!";
+	}
+
+	@Override
+	public void onLostControl()
+	{
+		active = false;
+	}
+}
