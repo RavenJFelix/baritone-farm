@@ -212,6 +212,23 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		objective = Objective.PRE_MINE;
 	}
 
+
+		private void lookAlongZAxis()
+		{
+
+					baritone.getLookBehavior().updateTarget(
+							RotationUtils.calcRotationFromCoords(ctx.playerFeet(), 
+								ctx.playerFeet().add(0,0,1)), true); //Cheap way of getting rotation
+		}
+	
+	private void lookAlongXAxis()
+	{
+
+					baritone.getLookBehavior().updateTarget(
+							RotationUtils.calcRotationFromCoords(ctx.playerFeet(), 
+								ctx.playerFeet().add(1,0,0)), true);
+
+	}
 	private void preMine()
 	{
 		IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
@@ -234,42 +251,36 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 			logDirect("Fuck");
 		}
 
+
 		if(ctx.world().getBlockState(ctx.playerFeet()).getBlock().equals(Blocks.PORTAL))
 		{
 			switch(playerAxis)
 			{
 				case Z : //HEY CHARLIE!!!
-					baritone.getLookBehavior().updateTarget(
-							RotationUtils.calcRotationFromCoords(ctx.playerFeet(), 
-								ctx.playerFeet().add(0,0,1)), true); //Cheap way of getting rotation
+					lookAlongZAxis();
 					//in the Z axis;
 
-				case X : //HEY CHARLIE!!!
-					baritone.getLookBehavior().updateTarget(
-							RotationUtils.calcRotationFromCoords(ctx.playerFeet(), 
-								ctx.playerFeet().add(1,0,0)), true);
-
+				case X :
+					lookAlongXAxis();
 			}
 			logDirect("Fucking forward");
 
 			baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_LEFT, true);
-			logDirect(new Boolean(baritone.getInputOverrideHandler().isInputForcedDown(Input.MOVE_LEFT)).toString());
 			pathingCommand = new PathingCommand(new GoalBlock(ctx.playerFeet().add(1,0,1)), PathingCommandType.SET_GOAL_AND_PATH);
 
-
-			preMinePos = ctx.playerFeet().add(1,0,1);
+			//preMinePos = ctx.playerFeet().add(1,0,1);
 		}
 		else
 		{
 
+			/*
 			if(!ctx.playerFeet().equals(preMinePos))
 			{
 
-				baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_LEFT, true);
 				logDirect(new Boolean(baritone.getInputOverrideHandler().isInputForcedDown(Input.MOVE_LEFT)).toString());
 				pathingCommand = new PathingCommand(new GoalBlock(preMinePos), PathingCommandType.SET_GOAL_AND_PATH);
-				return;
 			}
+			*/
 
 			preMinePos = ctx.playerFeet();
 
