@@ -51,7 +51,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
  	private List <BlockPos>portalFrameObsidian = new ArrayList<>();
 	private BlockOptionalMetaLookup filter;
 
-	private List<BlockPos> locations = new ArrayList<>();
+	private List<BlockPos> obsidianLocations = new ArrayList<>();
 	private final int MINE_FIELD_RADIUS = 5;
 	private int tickCount = 0;
 	private boolean active = false;
@@ -171,15 +171,19 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		pathingCommand = new PathingCommand(new GoalBlock(netherExitPoint), PathingCommandType.SET_GOAL_AND_PATH);
 		
 	}
+	private List<BlockPos> portalObsidianScan()
+	{
+
+	}
 
 	private void netherEntry()
 	{
-		updateLocation();
+		updateObsidianLocation();
 
 		portalFrameObsidian = new ArrayList<>();
 		if(mineFieldCorner1 != null && mineFieldCorner2 != null)
 		{
-		for(BlockPos pos: locations)
+		for(BlockPos pos: obsidianLocations)
 		{
 			if (inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
 			{
@@ -330,13 +334,13 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		}
 	}
 
-	private void updateLocation()
+	private void updateObsidianLocation()
 	{
 
 		ArrayList<Block> scan = new ArrayList<>();
 		scan.add(Blocks.OBSIDIAN);
 
-			Baritone.getExecutor().execute(()->locations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, -1, 6));
+			Baritone.getExecutor().execute(()->obsidianLocations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, -1, 6));
 	}
 	private void mine(boolean isSafeToCancel)
 	{
@@ -347,14 +351,14 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 			portalFrameObsidian.clear();
 			//logDirect("Scanning");
 			
-			updateLocation();
+			updateObsidianLocation();
 
 		}
-		if(locations == null)
+		if(obsidianLocations == null)
 		{
 			return;
 		}
-		for(BlockPos pos: locations)
+		for(BlockPos pos: obsidianLocations)
 		{
 			if (inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
 			{
