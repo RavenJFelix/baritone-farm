@@ -51,7 +51,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
  	private List <BlockPos>portalFrameObsidian = new ArrayList<>();
 	private BlockOptionalMetaLookup filter;
 
-	private List<BlockPos> locations;
+	private List<BlockPos> locations = new ArrayList<>();
 	private final int MINE_FIELD_RADIUS = 5;
 	private int tickCount = 0;
 	private boolean active = false;
@@ -174,7 +174,26 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 	private void netherEntry()
 	{
-		//logDirect("Nether Entry");
+		updateLocation();
+
+		portalFrameObsidian = new ArrayList<>();
+		if(mineFieldCorner1 != null && mineFieldCorner2 != null)
+		{
+		for(BlockPos pos: locations)
+		{
+			if (inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
+			{
+				portalFrameObsidian.add(pos);
+			}
+		}
+		}
+
+		if (!portalFrameObsidian.isEmpty())
+		{
+			objective = Objective.MINE;
+			return;
+		}
+		logDirect("Nether Entry");
 
 		if(ctx.player().dimension == -1)
 		{
@@ -234,6 +253,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 			}
 		if(ctx.world().getBlockState(ctx.playerFeet()).getBlock().equals(Blocks.PORTAL))
 		{
+			/*
 			switch(direct)
 			{
 				case Z : //HEY CHARLIE!!!
@@ -249,11 +269,27 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 			}
 			logDirect("Fucking forward");
-			baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_FORWARD, true);
-			//return;
+
+			baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_LEFT, true);
+			logDirect(new Boolean(baritone.getInputOverrideHandler().isInputForcedDown(Input.MOVE_LEFT)).toString());
+			pathingCommand = new PathingCommand(new GoalBlock(ctx.playerFeet().add(1,0,1)), PathingCommandType.SET_GOAL_AND_PATH);
+			
+
+			return;
+			*/
+			preMinePos = ctx.playerFeet().add(1,0,1);
 		}
-		else
+		//else
 		{
+
+			if(!ctx.playerFeet().equals(preMinePos))
+			{
+
+			baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_LEFT, true);
+			logDirect(new Boolean(baritone.getInputOverrideHandler().isInputForcedDown(Input.MOVE_LEFT)).toString());
+			pathingCommand = new PathingCommand(new GoalBlock(preMinePos), PathingCommandType.SET_GOAL_AND_PATH);
+				return;
+			}
 
 			preMinePos = ctx.playerFeet();
 
@@ -268,7 +304,7 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 
 
-		pathingCommand = new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
+		//pathingCommand = new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
 
 
 	}
@@ -294,18 +330,24 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		}
 	}
 
+	private void updateLocation()
+	{
+
+		ArrayList<Block> scan = new ArrayList<>();
+		scan.add(Blocks.OBSIDIAN);
+
+			Baritone.getExecutor().execute(()->locations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, -1, 6));
+	}
 	private void mine(boolean isSafeToCancel)
 	{
 		//logDirect("mine");
 
-		ArrayList<Block> scan = new ArrayList<>();
-		scan.add(Blocks.OBSIDIAN);
 		//if(Baritone.settings().mineGoalUpdateInterval.value != 0  && tickCount++ % Baritone.settings().mineGoalUpdateInterval.value == 0)
 		{
 			portalFrameObsidian.clear();
 			//logDirect("Scanning");
 			
-			Baritone.getExecutor().execute(()->locations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, -1, 6));
+			updateLocation();
 
 		}
 		if(locations == null)
@@ -321,7 +363,17 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 		}
 
 		baritone.getInputOverrideHandler().clearAllKeys();
-		List<BlockPos> droppedObsidian = droppedItemsScan();
+		List<BlockPos> allDroppedObsidian = droppedItemsScan();
+		List<BlockPos> droppedObsidian = new ArrayList<>();
+		for(BlockPos pos : allDroppedObsidian)
+		{
+
+			if(inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, pos))
+			{
+				droppedObsidian.add(pos);
+			}
+
+		}
 		List<BlockPos> placesToGo = new ArrayList<>();
 		List<Goal> goalz = new ArrayList<>();
 
@@ -351,15 +403,8 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 			{
 				
 				{
-					for(BlockPos droppedPos: droppedObsidian)
-					{
-						if(inBetweenInclusive(mineFieldCorner1, mineFieldCorner2, droppedPos))
-						{
-							placesToGo.add(droppedPos);
-						}
-					}
 					placesToGo.addAll(portalFrameObsidian);
-					//placesToGo.addAll(droppedObsidian);
+					placesToGo.addAll(droppedObsidian);
 					for(BlockPos position: placesToGo)
 					{
 						goalz.add(new GoalBlock(position));
