@@ -229,6 +229,22 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 								ctx.playerFeet().add(1,0,0)), true);
 
 	}
+
+	private void faceAxis(EnumFacing.Axis axis)
+		{
+			switch(axis)
+			{
+				case Z : //HEY CHARLIE!!!
+					lookAlongZAxis();
+					//in the Z axis;
+
+				case X :
+					lookAlongXAxis();
+			}
+
+		}
+
+
 	private void preMine()
 	{
 		IBlockState blockAtFeet = ctx.world().getBlockState(ctx.playerFeet());
@@ -240,33 +256,27 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 			return;
 		}
 
-		EnumFacing.Axis playerAxis;
-		try
-		{
-			playerAxis = (EnumFacing.Axis) blockAtFeet.getProperties().get(
-					blockAtFeet.getPropertyKeys().toArray()[0]);
-		}
-		catch(Exception e)
-		{
-			logDirect("Fuck");
-		}
+		
 
-
+	
 		if(ctx.world().getBlockState(ctx.playerFeet()).getBlock().equals(Blocks.PORTAL))
 		{
-			switch(playerAxis)
+			EnumFacing.Axis playerAxis;
+			try
 			{
-				case Z : //HEY CHARLIE!!!
-					lookAlongZAxis();
-					//in the Z axis;
-
-				case X :
-					lookAlongXAxis();
+				playerAxis = (EnumFacing.Axis) blockAtFeet.getProperties().get(
+						blockAtFeet.getPropertyKeys().toArray()[0]);
+				faceAxis(playerAxis);
 			}
+			catch(Exception e)
+			{
+				logDirect("Fuck");
+			}
+
 			logDirect("Fucking forward");
 
 			baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_LEFT, true);
-			pathingCommand = new PathingCommand(new GoalBlock(ctx.playerFeet().add(1,0,1)), PathingCommandType.SET_GOAL_AND_PATH);
+			pathingCommand = new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
 
 			//preMinePos = ctx.playerFeet().add(1,0,1);
 		}
@@ -284,20 +294,14 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 			preMinePos = ctx.playerFeet();
 
-			mineFieldCorner1 = preMinePos.add(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
-			//I'm a dirty bitch.
-			mineFieldCorner2 = preMinePos.subtract(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS));
-			logDirect(mineFieldCorner1.toString());
-			logDirect(mineFieldCorner2.toString());
+			mineZone = new BlockZone(preMinePos.add(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS)),
+					preMinePos.subtract(new BlockPos(MINE_FIELD_RADIUS, MINE_FIELD_RADIUS, MINE_FIELD_RADIUS))
+					);
+			logDirect(mineZone.getCorner1().toString());
+			logDirect(mineZone.getCorner2().toString());
 			baritone.getInputOverrideHandler().clearAllKeys();
 			objective = Objective.MINE;
 		}
-
-
-
-		//pathingCommand = new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
-
-
 	}
 
 	private void printIfPortalBlock()
