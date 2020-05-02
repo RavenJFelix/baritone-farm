@@ -160,7 +160,6 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 	private void netherExit(boolean isSafeToCancel)
 	{
-		//logDirect("netherExit");
 		int dim = ctx.player().dimension;
 		//logDirect(new Integer(dim).toString());
 		boolean overworld = (dim == 0);
@@ -208,9 +207,8 @@ public final class NetherLoopProcess extends BaritoneProcessHelper implements IN
 
 		private void preMineInit()
 		{
-			logDirect("Sigil");
-			logDirect(ctx.player().getPosition().toString());
 			logDirect("init premine");
+			logDirect(ctx.player().getPosition().toString());
 			objective = Objective.PRE_MINE;
 
 			//logDirect(mineFieldCorner1.toString());
